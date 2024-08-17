@@ -1,16 +1,48 @@
 # bloc_stream
 
-A new Flutter project.
+Как работать с mason.
 
-## Getting Started
+1.  Добавляем зависмиость на ПК
+    В MacOS
 
-This project is a starting point for a Flutter application.
+```
+# 🍺 Or install from https://brew.sh
+brew tap felangel/mason
+brew install mason
+```
 
-A few resources to get you started if this is your first Flutter project:
+2. Создадим папку bricks в корне проекта.
+3. Используем команду для генерации нового брика .
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```
+mason new brick_name
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+4. Пропишем в mason.yaml путь к нашему брику
+
+```
+bricks:
+  brick_name:
+    path: bricks/brick_name
+```
+
+5.  В папке **brick** создаим нужный нам шаблон
+6.  Добавим наш шаблон в mason
+
+```
+mason add -g brick_name --path bricks/brick_name
+
+```
+
+7. Сгенерируем код по шаблону mason
+
+```
+mason make brick_name --name #your name future#
+
+#Example
+
+mason make brick_bloc --name user
+
+```
+
+8. Код из примера сгенерирует папку блок, в которой лежит UserBloc, готовый к использованию!
