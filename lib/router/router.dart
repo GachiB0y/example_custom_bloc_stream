@@ -17,6 +17,16 @@ class AppNavigator extends StatefulWidget {
     context.findAncestorStateOfType<_AppNavigatorState>()?.change(fn);
   }
 
+  /// Метод для получения текущих страниц в навигаторе
+  /// Например для использования хлебных крошек
+  static List<Page<Object?>> pagesOf(BuildContext context) =>
+      context
+          .findAncestorStateOfType<_AppNavigatorState>()
+          ?._controller
+          .value
+          .toList(growable: false) ??
+      <Page<Object?>>[];
+
   @override
   State<AppNavigator> createState() => _AppNavigatorState();
 }
