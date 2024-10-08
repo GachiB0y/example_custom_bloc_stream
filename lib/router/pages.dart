@@ -2,8 +2,8 @@
 import 'package:bloc_stream/app.dart';
 import 'package:bloc_stream/feature/catalog/widget/catalog_screen.dart';
 import 'package:bloc_stream/feature/category/widget/category_screen.dart';
+import 'package:bloc_stream/feature/color/widget/colors_screen.dart';
 import 'package:bloc_stream/feature/product/widget/product_screen.dart';
-import 'package:bloc_stream/main.dart';
 import 'package:flutter/material.dart';
 
 enum AppPages {

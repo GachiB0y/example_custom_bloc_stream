@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:bloc_stream/bloc_stream.dart';
 import 'package:bloc_stream/common/model/dependencies.dart';
+import 'package:bloc_stream/feature/color/bloc/color_bloc.dart';
 import 'package:bloc_stream/feature/initialization/data/platform/platform_initialization.dart';
 import 'package:flutter/material.dart';
 

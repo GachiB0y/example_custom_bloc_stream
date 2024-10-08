@@ -1,4 +1,4 @@
-import 'package:bloc_stream/bloc_stream.dart';
+import 'package:bloc_stream/feature/color/bloc/color_bloc.dart';
 import 'package:bloc_stream/feature/initialization/widget/inherited_dependencies.dart';
 import 'package:flutter/material.dart';
 
