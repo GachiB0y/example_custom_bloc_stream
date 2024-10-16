@@ -1,3 +1,4 @@
+import 'package:bloc_stream/feature/deeplinks/bloc/deeplink_bloc.dart';
 import 'package:bloc_stream/router/pages.dart';
 import 'package:bloc_stream/router/router.dart';
 import 'package:flutter/material.dart';
@@ -8,15 +9,35 @@ class App extends StatelessWidget {
   final ValueNotifier<List<Page<Object?>>> controller;
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        title: 'Declarative Navigator Example',
-        theme: ThemeData.dark(),
-        debugShowCheckedModeBanner: false,
-        builder: (context, _) => AppNavigator(
-          home: AppPages.home.page(),
-          controller: controller,
-        ),
-      );
+  Widget build(BuildContext context) {
+    DeeplinkBloc bloc = DeeplinkBloc();
+    return MaterialApp(
+      title: 'Declarative Navigator Example',
+      theme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false,
+      builder: (context, _) => StreamBuilder<String>(
+          stream: bloc.state,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return AppNavigator(
+                home: AppPages.home.page(),
+                controller: controller,
+              );
+            } else {
+              return AppNavigator(
+                home: AppPages.home.page(),
+                controller: ValueNotifier<List<Page<Object?>>>([
+                  ...controller.value,
+                  AppPages.catalog.page(),
+                  AppPages.category.page(arguments: {'categoryId': 'wheels'}),
+                  AppPages.product
+                      .page(arguments: {'productId': 'product deeplinks'}),
+                ]),
+              );
+            }
+          }),
+    );
+  }
 }
 
 /// {@template main}
@@ -63,33 +84,44 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: Center(
-          child: Column(
-            children: [
-              const Text('Home'),
-              ListTile(
-                title: const Text('Go Bloc Exmaple'),
-                onTap: () => AppNavigator.change(
-                    context,
-                    (pages) => [
-                          ...pages,
-                          AppPages.bloc.page(),
-                        ]),
-              ),
-              const Text('Catalog'),
-              ListTile(
-                title: const Text('Go  to Catalog'),
-                onTap: () => AppNavigator.change(
-                    context,
-                    (pages) => [
-                          ...pages,
-                          AppPages.catalog.page(),
-                        ]),
-              ),
-            ],
-          ),
-        ),
+        body: const BodyWidget(),
       );
+}
+
+class BodyWidget extends StatelessWidget {
+  const BodyWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        children: [
+          const Text('Home'),
+          ListTile(
+            title: const Text('Go Bloc Exmaple'),
+            onTap: () => AppNavigator.change(
+                context,
+                (pages) => [
+                      ...pages,
+                      AppPages.bloc.page(),
+                    ]),
+          ),
+          const Text('Catalog'),
+          ListTile(
+            title: const Text('Go  to Catalog'),
+            onTap: () => AppNavigator.change(
+                context,
+                (pages) => [
+                      ...pages,
+                      AppPages.catalog.page(),
+                    ]),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// {@template main}
