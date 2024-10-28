@@ -10,33 +10,56 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DeeplinkBloc bloc = DeeplinkBloc();
     return MaterialApp(
       title: 'Declarative Navigator Example',
       theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
-      builder: (context, _) => StreamBuilder<String>(
-          stream: bloc.state,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return AppNavigator(
-                home: AppPages.home.page(),
-                controller: controller,
-              );
-            } else {
-              return AppNavigator(
-                home: AppPages.home.page(),
-                controller: ValueNotifier<List<Page<Object?>>>([
-                  ...controller.value,
-                  AppPages.catalog.page(),
-                  AppPages.category.page(arguments: {'categoryId': 'wheels'}),
-                  AppPages.product
-                      .page(arguments: {'productId': 'product deeplinks'}),
-                ]),
-              );
-            }
-          }),
+      builder: (context, _) => ConfigRoute(controller: controller),
     );
+  }
+}
+
+class ConfigRoute extends StatefulWidget {
+  const ConfigRoute({
+    super.key,
+    required this.controller,
+  });
+
+  final ValueNotifier<List<Page<Object?>>> controller;
+
+  @override
+  State<ConfigRoute> createState() => _ConfigRouteState();
+}
+
+class _ConfigRouteState extends State<ConfigRoute> {
+  late final DeeplinkBloc bloc;
+  @override
+  void initState() {
+    bloc = DeeplinkBloc();
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Page<Object?>>>(
+        stream: bloc.streamOutPut,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return AppNavigator(
+              home: AppPages.home.page(),
+              controller: widget.controller,
+            );
+          } else {
+            return AppNavigator(
+              home: AppPages.home.page(),
+              controller: ValueNotifier<List<Page<Object?>>>([
+                ...widget.controller.value,
+                ...snapshot.data ?? [],
+              ]),
+            );
+          }
+        });
   }
 }
 
