@@ -42,16 +42,16 @@ class _CounterBlocScreenState extends State<CounterBlocScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton(
-                        onPressed: () => context.read<CounterBLoC>().add(
-                              const IncrementCounterEvent(),
-                            ),
+                        onPressed: () => counterBLoC.add(
+                          const IncrementCounterEvent(),
+                        ),
                         child: const Text('Increment'),
                       ),
                       const SizedBox(width: 10),
                       ElevatedButton(
-                        onPressed: () => context.read<CounterBLoC>().add(
-                              const DecrementCounterEvent(),
-                            ),
+                        onPressed: () => counterBLoC.add(
+                          const DecrementCounterEvent(),
+                        ),
                         child: const Text('Decrement'),
                       ),
                     ],

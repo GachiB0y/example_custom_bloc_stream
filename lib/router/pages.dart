@@ -3,11 +3,15 @@ import 'package:bloc_stream/app.dart';
 import 'package:bloc_stream/feature/catalog/widget/catalog_screen.dart';
 import 'package:bloc_stream/feature/category/widget/category_screen.dart';
 import 'package:bloc_stream/feature/color/widget/colors_screen.dart';
+import 'package:bloc_stream/feature/counter/widget/counter_bloc_screen.dart';
+import 'package:bloc_stream/feature/counter/widget/counter_cubit_screen.dart';
 import 'package:bloc_stream/feature/product/widget/product_screen.dart';
 import 'package:flutter/material.dart';
 
 enum AppPages {
   home('home', title: 'Home'),
+  blocCounter('bloc-counter', title: 'Bloc Counter'),
+  cubitCounter('cubit-counter', title: 'Cubit Counter'),
   settings('settings', title: 'Settings'),
   bloc('bloc-example', title: 'Bloc Example'),
   catalog('catalog', title: 'Catalog'),
@@ -45,6 +49,10 @@ enum AppPages {
       case AppPages.product:
         return ProductScreen(
             productId: int.tryParse(arguments!['productId'] ?? '0') ?? 0);
+      case AppPages.blocCounter:
+        return const CounterBlocScreen();
+      case AppPages.cubitCounter:
+        return const CounterCubitScreen();
     }
   }
 }

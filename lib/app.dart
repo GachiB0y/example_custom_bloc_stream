@@ -121,7 +121,7 @@ class BodyWidget extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          const Text('Home'),
+          const Text('Bloc Exmaple'),
           ListTile(
             title: const Text('Go Bloc Exmaple'),
             onTap: () => AppNavigator.change(
@@ -129,6 +129,26 @@ class BodyWidget extends StatelessWidget {
                 (pages) => [
                       ...pages,
                       AppPages.bloc.page(),
+                    ]),
+          ),
+          const Text('Counter Bloc '),
+          ListTile(
+            title: const Text('Go Counter Bloc'),
+            onTap: () => AppNavigator.change(
+                context,
+                (pages) => [
+                      ...pages,
+                      AppPages.blocCounter.page(),
+                    ]),
+          ),
+          const Text('Counter Cubit '),
+          ListTile(
+            title: const Text('Go Counter Cubit'),
+            onTap: () => AppNavigator.change(
+                context,
+                (pages) => [
+                      ...pages,
+                      AppPages.cubitCounter.page(),
                     ]),
           ),
           const Text('Catalog'),

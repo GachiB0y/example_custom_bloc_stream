@@ -21,7 +21,7 @@ class CounterCubit extends Cubit<CounterState> {
 
   Future<void> increment() async {
     try {
-      emit(CounterState.processing(data: state.data));
+      // emit(CounterState.processing(data: state.data));
       final newData = await _repository.increment(count: state.data!);
       emit(CounterState.successful(data: newData));
     } on Object catch (err, stackTrace) {
@@ -34,7 +34,7 @@ class CounterCubit extends Cubit<CounterState> {
 
   Future<void> decrement() async {
     try {
-      emit(CounterState.processing(data: state.data));
+      // emit(CounterState.processing(data: state.data));
       final newData = await _repository.decrement(count: state.data!);
       emit(CounterState.successful(data: newData));
     } on Object catch (err, stackTrace) {
