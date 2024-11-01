@@ -5,7 +5,6 @@ import 'package:bloc_concurrency/bloc_concurrency.dart' as bloc_concurrency;
 import 'package:bloc_stream/feature/counter/data/repo/counter_repo.dart';
 import 'package:flutter/foundation.dart';
 
-// part 'counter_bloc.freezed.dart';
 part 'counter_event.dart';
 part 'counter_state.dart';
 

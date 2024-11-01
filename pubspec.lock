@@ -200,6 +200,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.11.1"
+  stream_bloc:
+    dependency: "direct main"
+    description:
+      name: stream_bloc
+      sha256: fb72cad85bc6f48d8dd2f83206e909de993b99daacb05c84a5c08dc6e7bc03d2
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.3"
   stream_channel:
     dependency: transitive
     description:

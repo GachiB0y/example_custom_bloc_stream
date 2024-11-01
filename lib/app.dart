@@ -12,7 +12,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Declarative Navigator Example',
-      theme: ThemeData.dark(),
+      theme: ThemeData.light(),
       debugShowCheckedModeBanner: false,
       builder: (context, _) => ConfigRoute(controller: controller),
     );
@@ -139,6 +139,16 @@ class BodyWidget extends StatelessWidget {
                 (pages) => [
                       ...pages,
                       AppPages.blocCounter.page(),
+                    ]),
+          ),
+          const Text('Counter Stream Bloc '),
+          ListTile(
+            title: const Text('Go Counter Stream Bloc'),
+            onTap: () => AppNavigator.change(
+                context,
+                (pages) => [
+                      ...pages,
+                      AppPages.blocStreamCounter.page(),
                     ]),
           ),
           const Text('Counter Cubit '),
