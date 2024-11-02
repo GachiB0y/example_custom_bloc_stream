@@ -131,6 +131,26 @@ class BodyWidget extends StatelessWidget {
                       AppPages.bloc.page(),
                     ]),
           ),
+          const Text('Counter Custom Stream Bloc '),
+          ListTile(
+            title: const Text('Go Counter  Custom Stream Bloc'),
+            onTap: () => AppNavigator.change(
+                context,
+                (pages) => [
+                      ...pages,
+                      AppPages.blocStreamCounter.page(),
+                    ]),
+          ),
+          const Text('Counter Custom Stream Bloc '),
+          ListTile(
+            title: const Text('Go Counter Stream Bloc'),
+            onTap: () => AppNavigator.change(
+                context,
+                (pages) => [
+                      ...pages,
+                      AppPages.blocStreamCounter.page(),
+                    ]),
+          ),
           const Text('Counter Bloc '),
           ListTile(
             title: const Text('Go Counter Bloc'),
@@ -139,16 +159,6 @@ class BodyWidget extends StatelessWidget {
                 (pages) => [
                       ...pages,
                       AppPages.blocCounter.page(),
-                    ]),
-          ),
-          const Text('Counter Stream Bloc '),
-          ListTile(
-            title: const Text('Go Counter Stream Bloc'),
-            onTap: () => AppNavigator.change(
-                context,
-                (pages) => [
-                      ...pages,
-                      AppPages.blocStreamCounter.page(),
                     ]),
           ),
           const Text('Counter Cubit '),

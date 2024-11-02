@@ -70,3 +70,84 @@ class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
     }
   }
 }
+
+class CounterCustomStreamBloc implements Sink<CounterEvent> {
+  CounterCustomStreamBloc({
+    required final ICounterRepository repository,
+  }) : _repository = repository {
+    _currentState = const CounterStreamState.idle(
+      data: 0,
+      message: 'Initial idle state',
+    );
+  }
+  final ICounterRepository _repository;
+  final _inputStreamController = StreamController<CounterEvent>();
+  late CounterStreamState _currentState;
+
+  late final Stream<CounterStreamState> _stream = _inputStreamController.stream
+      .map((event) {
+        print("event: $event");
+        return event;
+      })
+      .asyncExpand(_mapEventToState)
+      .map((state) {
+        _currentState = state;
+        print("state: $state");
+        return state;
+      })
+      .asBroadcastStream();
+  Stream<CounterStreamState> get stream => _stream;
+
+  CounterStreamState get state => _currentState;
+  Stream<CounterStreamState> _mapEventToState(CounterEvent event) async* {
+    switch (event) {
+      case IncrementCounterEvent():
+        yield* increment(event);
+      case DecrementCounterEvent():
+        yield* decrement(event);
+    }
+  }
+
+  @override
+  void add(CounterEvent event) {
+    _inputStreamController.sink.add(event);
+  }
+
+  @override
+  void close() {
+    _inputStreamController.close();
+  }
+
+  /// Fetch event handler  /// increment event handler
+  Stream<CounterStreamState> increment(IncrementCounterEvent event) async* {
+    // yield CounterStreamState.processing(data: state.data);
+
+    try {
+      final newData = await _repository.increment(count: state.data!);
+      yield CounterStreamState.successful(data: newData);
+    } on Object catch (error, stackTrace) {
+      // Логирование ошибки (раскомментируйте строку при необходимости)
+      // l.e('An error occurred in the CounterBLoC: $error', stackTrace);
+      yield CounterStreamState.error(data: state.data);
+    } finally {
+      yield CounterStreamState.idle(data: state.data);
+    }
+  }
+
+  Stream<CounterStreamState> decrement(
+    DecrementCounterEvent event,
+  ) async* {
+    // yield CounterStreamState.processing(data: state.data);
+
+    try {
+      final newData = await _repository.decrement(count: state.data!);
+      yield CounterStreamState.successful(data: newData);
+    } on Object catch (error, stackTrace) {
+      // Логирование ошибки (раскомментируйте строку при необходимости)
+      // l.e('An error occurred in the CounterBLoC: $error', stackTrace);
+      yield CounterStreamState.error(data: state.data);
+    } finally {
+      yield CounterStreamState.idle(data: state.data);
+    }
+  }
+}
