@@ -9,8 +9,7 @@ part 'counter_event.dart';
 part 'counter_state.dart';
 
 /// Business Logic Component CounterBLoC
-class CounterBLoC extends Bloc<CounterEvent, CounterState>
-    implements EventSink<CounterEvent> {
+class CounterBLoC extends Bloc<CounterEvent, CounterState> {
   CounterBLoC({
     required final ICounterRepository repository,
     final CounterState? initialState,
@@ -29,13 +28,7 @@ class CounterBLoC extends Bloc<CounterEvent, CounterState>
         DecrementCounterEvent decrementCounterEvent =>
           _decrement(decrementCounterEvent, emit),
       },
-      //  event.map<Future<void>>(
-      //   fetch: (event) => _fetch(event, emit),
-      // ),
       transformer: bloc_concurrency.sequential(),
-      //transformer: bloc_concurrency.restartable(),
-      //transformer: bloc_concurrency.droppable(),
-      //transformer: bloc_concurrency.concurrent(),
     );
   }
 
@@ -45,7 +38,7 @@ class CounterBLoC extends Bloc<CounterEvent, CounterState>
   Future<void> _increment(
       IncrementCounterEvent event, Emitter<CounterState> emit) async {
     try {
-      emit(CounterState.processing(data: state.data));
+      // emit(CounterState.processing(data: state.data));
       final newData = await _repository.increment(count: state.data!);
       emit(CounterState.successful(data: newData));
     } on Object catch (err, stackTrace) {
@@ -60,7 +53,7 @@ class CounterBLoC extends Bloc<CounterEvent, CounterState>
   Future<void> _decrement(
       DecrementCounterEvent event, Emitter<CounterState> emit) async {
     try {
-      emit(CounterState.processing(data: state.data));
+      // emit(CounterState.processing(data: state.data));
       final newData = await _repository.decrement(count: state.data!);
       emit(CounterState.successful(data: newData));
     } on Object catch (err, stackTrace) {

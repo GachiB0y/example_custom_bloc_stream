@@ -28,10 +28,8 @@ class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
     switch (event) {
       case IncrementCounterEvent incrementCounterEvent:
         yield* increment(incrementCounterEvent);
-        break;
       case DecrementCounterEvent decrementCounterEvent:
         yield* decrement(decrementCounterEvent);
-        break;
       default:
         throw UnimplementedError('Unhandled event: $event');
     }
@@ -79,11 +77,13 @@ class CounterCustomStreamBloc implements Sink<CounterEvent> {
       data: 0,
       message: 'Initial idle state',
     );
+    add(const InitStateCounterEvent());
   }
   final ICounterRepository _repository;
   final _inputStreamController = StreamController<CounterEvent>();
   late CounterStreamState _currentState;
-
+  Stream<CounterStreamState> get stream => _stream;
+  CounterStreamState get state => _currentState;
   late final Stream<CounterStreamState> _stream = _inputStreamController.stream
       .map((event) {
         print("event: $event");
@@ -96,15 +96,15 @@ class CounterCustomStreamBloc implements Sink<CounterEvent> {
         return state;
       })
       .asBroadcastStream();
-  Stream<CounterStreamState> get stream => _stream;
 
-  CounterStreamState get state => _currentState;
   Stream<CounterStreamState> _mapEventToState(CounterEvent event) async* {
     switch (event) {
       case IncrementCounterEvent():
         yield* increment(event);
       case DecrementCounterEvent():
         yield* decrement(event);
+      case InitStateCounterEvent():
+        yield _currentState;
     }
   }
 
@@ -121,7 +121,6 @@ class CounterCustomStreamBloc implements Sink<CounterEvent> {
   /// Fetch event handler  /// increment event handler
   Stream<CounterStreamState> increment(IncrementCounterEvent event) async* {
     // yield CounterStreamState.processing(data: state.data);
-
     try {
       final newData = await _repository.increment(count: state.data!);
       yield CounterStreamState.successful(data: newData);

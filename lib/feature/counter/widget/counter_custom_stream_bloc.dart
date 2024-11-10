@@ -24,7 +24,7 @@ class _CounterCustomStreamBlocScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Counter BLoC'),
+        title: const Text('Custom Stream'),
       ),
       body: StreamBuilder<CounterStreamState>(
         stream: counterBLoC.stream,

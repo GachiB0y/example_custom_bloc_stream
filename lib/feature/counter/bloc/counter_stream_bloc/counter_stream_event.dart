@@ -5,6 +5,11 @@ sealed class CounterEvent {
   const CounterEvent();
 }
 
+// Init State Event
+class InitStateCounterEvent extends CounterEvent {
+  const InitStateCounterEvent();
+}
+
 // Increment
 class IncrementCounterEvent extends CounterEvent {
   const IncrementCounterEvent();

@@ -24,7 +24,7 @@ class _CounterStreamBlocScreenState extends State<CounterStreamBlocScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Counter BLoC'),
+        title: const Text('stream_bloc'),
       ),
       body: BlocBuilder<CounterStreamBLoC, CounterStreamState>(
         bloc: counterBLoC,

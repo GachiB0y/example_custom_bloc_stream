@@ -131,9 +131,9 @@ class BodyWidget extends StatelessWidget {
                       AppPages.bloc.page(),
                     ]),
           ),
-          const Text('Counter Custom Stream Bloc '),
+          const Text('Counter Stream package Bloc '),
           ListTile(
-            title: const Text('Go Counter  Custom Stream Bloc'),
+            title: const Text('Go Counter Stream package Bloc'),
             onTap: () => AppNavigator.change(
                 context,
                 (pages) => [
@@ -148,7 +148,7 @@ class BodyWidget extends StatelessWidget {
                 context,
                 (pages) => [
                       ...pages,
-                      AppPages.blocStreamCounter.page(),
+                      AppPages.blocCustomStreamCounter.page(),
                     ]),
           ),
           const Text('Counter Bloc '),
