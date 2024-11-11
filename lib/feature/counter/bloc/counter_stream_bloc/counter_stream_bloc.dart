@@ -30,8 +30,8 @@ class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
         yield* increment(incrementCounterEvent);
       case DecrementCounterEvent decrementCounterEvent:
         yield* decrement(decrementCounterEvent);
-      default:
-        throw UnimplementedError('Unhandled event: $event');
+      case InitStateCounterEvent initStateCounterEvent:
+        yield state;
     }
   }
 
@@ -42,6 +42,7 @@ class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
     try {
       final newData = await _repository.increment(count: state.data!);
       yield CounterStreamState.successful(data: newData);
+      await Future.delayed(const Duration(milliseconds: 100));
     } on Object catch (error, stackTrace) {
       // Логирование ошибки (раскомментируйте строку при необходимости)
       // l.e('An error occurred in the CounterBLoC: $error', stackTrace);
@@ -59,6 +60,7 @@ class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
     try {
       final newData = await _repository.decrement(count: state.data!);
       yield CounterStreamState.successful(data: newData);
+      await Future.delayed(const Duration(milliseconds: 100));
     } on Object catch (error, stackTrace) {
       // Логирование ошибки (раскомментируйте строку при необходимости)
       // l.e('An error occurred in the CounterBLoC: $error', stackTrace);
@@ -124,6 +126,7 @@ class CounterCustomStreamBloc implements Sink<CounterEvent> {
     try {
       final newData = await _repository.increment(count: state.data!);
       yield CounterStreamState.successful(data: newData);
+      await Future.delayed(const Duration(milliseconds: 100));
     } on Object catch (error, stackTrace) {
       // Логирование ошибки (раскомментируйте строку при необходимости)
       // l.e('An error occurred in the CounterBLoC: $error', stackTrace);
@@ -141,6 +144,7 @@ class CounterCustomStreamBloc implements Sink<CounterEvent> {
     try {
       final newData = await _repository.decrement(count: state.data!);
       yield CounterStreamState.successful(data: newData);
+      await Future.delayed(const Duration(milliseconds: 100));
     } on Object catch (error, stackTrace) {
       // Логирование ошибки (раскомментируйте строку при необходимости)
       // l.e('An error occurred in the CounterBLoC: $error', stackTrace);
