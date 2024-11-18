@@ -131,6 +131,16 @@ class BodyWidget extends StatelessWidget {
                       AppPages.bloc.page(),
                     ]),
           ),
+          const Text('Counter Notifier'),
+          ListTile(
+            title: const Text('Go  Counter Notifier'),
+            onTap: () => AppNavigator.change(
+                context,
+                (pages) => [
+                      ...pages,
+                      AppPages.counterNotifier.page(),
+                    ]),
+          ),
           const Text('Counter Stream package Bloc '),
           ListTile(
             title: const Text('Go Counter Stream package Bloc'),

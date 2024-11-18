@@ -6,12 +6,14 @@ import 'package:bloc_stream/feature/color/widget/colors_screen.dart';
 import 'package:bloc_stream/feature/counter/widget/counter_bloc_screen.dart';
 import 'package:bloc_stream/feature/counter/widget/counter_cubit_screen.dart';
 import 'package:bloc_stream/feature/counter/widget/counter_custom_stream_bloc.dart';
+import 'package:bloc_stream/feature/counter/widget/counter_notifier_screen.dart';
 import 'package:bloc_stream/feature/counter/widget/counter_stream_bloc_screen.dart';
 import 'package:bloc_stream/feature/product/widget/product_screen.dart';
 import 'package:flutter/material.dart';
 
 enum AppPages {
   home('home', title: 'Home'),
+  counterNotifier('counter-notifier', title: 'Counter Notifier'),
   blocCounter('bloc-counter', title: 'Bloc Counter'),
   blocStreamCounter('bloc-stream-counter', title: 'Bloc Stream Counter'),
   blocCustomStreamCounter('bloc-custom-stream-counter',
@@ -63,6 +65,8 @@ enum AppPages {
         return const CounterStreamBlocScreen();
       case AppPages.blocCustomStreamCounter:
         return const CounterCustomStreamBlocScreen();
+      case AppPages.counterNotifier:
+        return const CounterNotifierScreen();
     }
   }
 }

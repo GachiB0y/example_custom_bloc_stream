@@ -6,6 +6,7 @@ abstract interface class ICounterRepository {
 }
 
 class CounterRepo implements ICounterRepository {
+  const CounterRepo();
   @override
   Future<int> increment({required int count}) async {
     int newCount = count;
