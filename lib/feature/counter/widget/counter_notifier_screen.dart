@@ -23,7 +23,7 @@ class _CounterNotifierScreenState extends State<CounterNotifierScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Counter Cubit'),
+        title: const Text('Counter Notifier'),
       ),
       body: ChangeNotifierProvider<CountModel>(
           model: counterModel, child: const BodyWidget()),

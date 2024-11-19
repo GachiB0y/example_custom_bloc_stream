@@ -1,14 +1,15 @@
 import 'package:flutter/widgets.dart';
 
 /// Inherited widget for quick access in the element tree.
-class ChangeNotifierProvider<T extends Listenable> extends InheritedWidget {
+class ChangeNotifierProvider<T extends Listenable>
+    extends InheritedNotifier<T> {
   const ChangeNotifierProvider({
     super.key,
     required this.model,
     required super.child,
-  });
+  }) : super(notifier: model);
 
-  final T model;
+  final T? model;
 
   /// The model from the closest instance of this class
   /// that encloses the given context, if any.
@@ -16,18 +17,15 @@ class ChangeNotifierProvider<T extends Listenable> extends InheritedWidget {
   static T? maybeOf<T extends Listenable>(BuildContext context,
       {bool listen = true}) {
     if (listen) {
-      final notifier = context
-          .dependOnInheritedWidgetOfExactType<ChangeNotifierProvider<T>>();
-      return notifier?.model;
+      return context
+          .dependOnInheritedWidgetOfExactType<ChangeNotifierProvider<T>>()
+          ?.notifier;
     } else {
       final widget = context
           .getElementForInheritedWidgetOfExactType<ChangeNotifierProvider<T>>()
           ?.widget;
 
-      if (widget is ChangeNotifierProvider<T>) {
-        return widget.model;
-      }
-      return null;
+      return widget is ChangeNotifierProvider<T> ? widget.notifier : null;
     }
   }
 
@@ -45,5 +43,6 @@ class ChangeNotifierProvider<T extends Listenable> extends InheritedWidget {
       maybeOf(context, listen: listen) ?? _notFoundInheritedWidgetOfExactType();
 
   @override
-  bool updateShouldNotify(covariant ChangeNotifierProvider oldWidget) => false;
+  bool updateShouldNotify(covariant InheritedNotifier<T> oldWidget) =>
+      oldWidget.notifier != notifier || identical(oldWidget.notifier, notifier);
 }
