@@ -23,103 +23,80 @@ class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
         ) {
     _receiver = CounterControllerReceiver(
       repository: _repository,
-      state: state,
     );
   }
 
   final ICounterRepository _repository;
 
-  final CounterControllerInvoker _invoker = CounterControllerInvoker();
+  final CounterControllerInvoker<Stream<CounterStreamState>> _invoker =
+      CounterControllerInvoker<Stream<CounterStreamState>>();
   late final CounterControllerReceiver _receiver;
 
   @override
   Stream<CounterStreamState> mapEventToStates(CounterEvent event) async* {
     switch (event) {
       case IncrementCounterEvent incrementCounterEvent:
-        yield* _invoker.executeCommand(IncrementCommand(
-            receiver: _receiver, event: incrementCounterEvent));
+        yield* _invoker.executeCommand(
+          IncrementCommand(
+            receiver: _receiver,
+            event: incrementCounterEvent,
+            currentState: state,
+          ),
+        );
       case DecrementCounterEvent decrementCounterEvent:
-        yield* decrement(decrementCounterEvent);
+        yield* _invoker.executeCommand(
+          DecrementCommand(
+            receiver: _receiver,
+            event: decrementCounterEvent,
+            currentState: state,
+          ),
+        );
       case InitStateCounterEvent initStateCounterEvent:
         yield state;
     }
+    _invoker.logHistory();
   }
-
-  /// Fetch event handler  /// increment event handler
-  // Stream<CounterStreamState> increment(IncrementCounterEvent event) async* {
-  //   // yield CounterStreamState.processing(data: state.data);
-
-  //   try {
-  //     final newData = await _repository.increment(count: state.data!);
-  //     yield CounterStreamState.successful(data: newData);
-  //     await Future.delayed(const Duration(milliseconds: 100));
-  //   } on Object catch (error, stackTrace) {
-  //     // Логирование ошибки (раскомментируйте строку при необходимости)
-  //     // l.e('An error occurred in the CounterBLoC: $error', stackTrace);
-  //     yield CounterStreamState.error(data: state.data);
-  //   } finally {
-  //     yield CounterStreamState.idle(data: state.data);
-  //   }
-  // }
-
-  // Stream<CounterStreamState> decrement(
-  //   DecrementCounterEvent event,
-  // ) async* {
-  //   // yield CounterStreamState.processing(data: state.data);
-
-  //   try {
-  //     final newData = await _repository.decrement(count: state.data!);
-  //     yield CounterStreamState.successful(data: newData);
-  //     await Future.delayed(const Duration(milliseconds: 100));
-  //   } on Object catch (error, stackTrace) {
-  //     // Логирование ошибки (раскомментируйте строку при необходимости)
-  //     // l.e('An error occurred in the CounterBLoC: $error', stackTrace);
-  //     yield CounterStreamState.error(data: state.data);
-  //   } finally {
-  //     yield CounterStreamState.idle(data: state.data);
-  //   }
-  // }
 }
 
 class CounterControllerReceiver {
-  const CounterControllerReceiver(
-      {required ICounterRepository repository, required this.state})
-      : _repository = repository;
+  const CounterControllerReceiver({
+    required ICounterRepository repository,
+  }) : _repository = repository;
 
   final ICounterRepository _repository;
-  final CounterStreamState state;
 
-  Stream<CounterStreamState> increment(IncrementCounterEvent event) async* {
+  Stream<CounterStreamState> increment(
+      IncrementCounterEvent event, CounterStreamState currentState) async* {
     // yield CounterStreamState.processing(data: state.data);
+    int? newData;
 
     try {
-      final newData = await _repository.increment(count: state.data!);
+      newData = await _repository.increment(count: currentState.data!);
+
       yield CounterStreamState.successful(data: newData);
-      await Future.delayed(const Duration(milliseconds: 100));
     } on Object catch (error, stackTrace) {
       // Логирование ошибки (раскомментируйте строку при необходимости)
       // l.e('An error occurred in the CounterBLoC: $error', stackTrace);
-      yield CounterStreamState.error(data: state.data);
+      yield CounterStreamState.error(data: currentState.data);
     } finally {
-      yield CounterStreamState.idle(data: state.data);
+      yield CounterStreamState.idle(data: newData ?? currentState.data);
     }
   }
 
   Stream<CounterStreamState> decrement(
-    DecrementCounterEvent event,
-  ) async* {
+      DecrementCounterEvent event, CounterStreamState currentState) async* {
     // yield CounterStreamState.processing(data: state.data);
-
+    int? newData;
     try {
-      final newData = await _repository.decrement(count: state.data!);
+      newData = await _repository.decrement(count: currentState.data!);
       yield CounterStreamState.successful(data: newData);
       await Future.delayed(const Duration(milliseconds: 100));
     } on Object catch (error, stackTrace) {
       // Логирование ошибки (раскомментируйте строку при необходимости)
       // l.e('An error occurred in the CounterBLoC: $error', stackTrace);
-      yield CounterStreamState.error(data: state.data);
+      yield CounterStreamState.error(data: currentState.data);
     } finally {
-      yield CounterStreamState.idle(data: state.data);
+      yield CounterStreamState.idle(data: newData ?? currentState.data);
     }
   }
 }
@@ -133,28 +110,42 @@ sealed class Command<T> {
 
 /// Конкретная команда
 class IncrementCommand implements Command<Stream<CounterStreamState>> {
-  const IncrementCommand({required this.receiver, required this.event});
+  const IncrementCommand({
+    required this.receiver,
+    required this.event,
+    required this.currentState,
+  });
 
   @override
   final CounterControllerReceiver receiver;
 
   final IncrementCounterEvent event;
 
+  final CounterStreamState currentState;
+
   @override
-  Stream<CounterStreamState> execute() => receiver.increment(event);
+  Stream<CounterStreamState> execute() =>
+      receiver.increment(event, currentState);
 }
 
 /// Конкретная команда
 class DecrementCommand implements Command<Stream<CounterStreamState>> {
-  const DecrementCommand({required this.receiver, required this.event});
+  const DecrementCommand({
+    required this.receiver,
+    required this.event,
+    required this.currentState,
+  });
 
   @override
   final CounterControllerReceiver receiver;
 
   final DecrementCounterEvent event;
 
+  final CounterStreamState currentState;
+
   @override
-  Stream<CounterStreamState> execute() => receiver.decrement(event);
+  Stream<CounterStreamState> execute() =>
+      receiver.decrement(event, currentState);
 }
 
 /// Отправитель
@@ -173,13 +164,13 @@ class CounterControllerInvoker<T> {
   T? repeatLastCommand() {
     final Command<T>? command = _lastCommand;
 
-    if (command != null) return executeCommand<T>(command);
+    if (command != null) return executeCommand(command);
     return null;
   }
 
   void logHistory() {
     for (final String log in _logs) {
-      print(log);
+      debugPrint('logHistory:$log');
     }
   }
 }

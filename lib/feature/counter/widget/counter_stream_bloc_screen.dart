@@ -1,5 +1,6 @@
-import 'package:bloc_stream/feature/counter/bloc/counter_stream_bloc/counter_stream_bloc.dart';
+// import 'package:bloc_stream/feature/counter/bloc/counter_stream_bloc/counter_stream_bloc.dart';
 import 'package:bloc_stream/feature/counter/data/repo/counter_repo.dart';
+import 'package:bloc_stream/feature/counter/stream_bloc_command/bloc/counter_stream_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,7 +18,7 @@ class _CounterStreamBlocScreenState extends State<CounterStreamBlocScreen> {
   @override
   void initState() {
     super.initState();
-    counterBLoC = CounterStreamBLoC(repository: CounterRepo());
+    counterBLoC = CounterStreamBLoC(repository: const CounterRepo());
   }
 
   @override
