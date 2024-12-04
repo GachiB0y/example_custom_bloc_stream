@@ -80,6 +80,7 @@ abstract class CounterCommand {
   const CounterCommand();
 
   Stream<CounterStreamState> execute({
+    required CounterEvent event,
     required ICounterRepository repository,
   });
 
@@ -94,7 +95,7 @@ class IncrementCommand extends CounterCommand {
 
   @override
   Stream<CounterStreamState> execute({
-    // required CounterStreamState currentState,
+    required CounterEvent event,
     required ICounterRepository repository,
   }) async* {
     yield CounterStreamState.processing(data: currentState.data);
@@ -125,6 +126,7 @@ class DecrementCommand extends CounterCommand {
 
   @override
   Stream<CounterStreamState> execute({
+    required CounterEvent event,
     required ICounterRepository repository,
   }) async* {
     yield CounterStreamState.processing(data: currentState.data);
@@ -155,6 +157,7 @@ class InitStateCommand extends CounterCommand {
 
   @override
   Stream<CounterStreamState> execute({
+    required CounterEvent event,
     required ICounterRepository repository,
   }) async* {
     // Просто возвращаем текущее состояние
@@ -185,15 +188,18 @@ class DefaultCounterCommandFactory implements CounterCommandFactory {
     required ICounterRepository repository,
   }) {
     switch (event) {
-      case IncrementCounterEvent():
+      case IncrementCounterEvent incrementCounterEvent:
         _commandHistory.add(IncrementCommand(currentState));
-        return IncrementCommand(currentState).execute(repository: repository);
-      case DecrementCounterEvent():
+        return IncrementCommand(currentState)
+            .execute(repository: repository, event: incrementCounterEvent);
+      case DecrementCounterEvent decrementCounterEvent:
         _commandHistory.add(IncrementCommand(currentState));
-        return DecrementCommand(currentState).execute(repository: repository);
-      case InitStateCounterEvent():
+        return DecrementCommand(currentState)
+            .execute(repository: repository, event: decrementCounterEvent);
+      case InitStateCounterEvent initStateCounterEvent:
         _commandHistory.add(IncrementCommand(currentState));
-        return InitStateCommand(currentState).execute(repository: repository);
+        return InitStateCommand(currentState)
+            .execute(repository: repository, event: initStateCounterEvent);
       case UndoCounterEvent():
         return _commandHistory.undo();
     }
