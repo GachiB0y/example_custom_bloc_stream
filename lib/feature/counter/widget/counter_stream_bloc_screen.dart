@@ -18,7 +18,10 @@ class _CounterStreamBlocScreenState extends State<CounterStreamBlocScreen> {
   @override
   void initState() {
     super.initState();
-    counterBLoC = CounterStreamBLoC(repository: const CounterRepo());
+    counterBLoC = CounterStreamBLoC(
+      repository: const CounterRepo(),
+      commandFactory: const DefaultCounterCommandFactory(),
+    );
   }
 
   @override
