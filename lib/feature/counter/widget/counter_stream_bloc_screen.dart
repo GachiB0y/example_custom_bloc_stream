@@ -20,7 +20,7 @@ class _CounterStreamBlocScreenState extends State<CounterStreamBlocScreen> {
     super.initState();
     counterBLoC = CounterStreamBLoC(
       repository: const CounterRepo(),
-      commandFactory: const DefaultCounterCommandFactory(),
+      commandFactory: DefaultCounterCommandFactory(CommandHistory()),
     );
   }
 
@@ -61,6 +61,12 @@ class _CounterStreamBlocScreenState extends State<CounterStreamBlocScreen> {
                         child: const Text('Decrement'),
                       ),
                     ],
+                  ),
+                  ElevatedButton(
+                    onPressed: () => counterBLoC.add(
+                      const UndoCounterEvent(),
+                    ),
+                    child: const Text('Undo'),
                   ),
                 ],
               ),
