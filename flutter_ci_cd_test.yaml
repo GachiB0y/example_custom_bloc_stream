@@ -1,0 +1,158 @@
+stages:
+  - static
+  - test
+  - build
+
+variables:
+  GIT_STRATEGY: clone
+
+# workflow:
+# rules:
+#   - if: '$CI_COMMIT_TAG && $CI_COMMIT_BRANCH == "main"'
+#     when: manual
+#   - when: manual.
+
+flutter-analyze:
+  stage: static
+  interruptible: true
+  before_script:
+    # Установка зависимостей
+    - flutter pub get
+  script:
+    # Проверка и форматирование кода
+    - dart format --set-exit-if-changed lib
+    # Анализ кода
+    - flutter analyze
+  tags:
+    - macos
+  when: manual
+  # Генерация кода и проверка его с последним коммитом.
+  # С помощью этой задачи можно проверить, нет ли в генерируемом коде изменений, которые внесли вручную.
+  # Это может привести к проблемам с совместимостью и поддержкой кода.
+code-generation-mismatch-check:
+  stage: static
+  interruptible: true
+  before_script:
+    - flutter pub get
+  script:
+    # Генерация кода
+    - dart run build_runner build --delete-conflicting-outputs --fail-on-severe # Проверка наличия изменений
+    - git diff # Проверка наличия изменений завершаеться с ошибкой 1 если есть изменения
+    - (( $(git status --porcelain|wc -l) == 0 )) || { echo >&2 "Some changes in generated files detected"; exit 1; }
+  tags:
+    - macos
+  when: manual
+
+flutter-test:
+  stage: test
+  interruptible: false
+  before_script:
+    - flutter pub get
+    - flutter pub run build_runner build --delete-conflicting-outputs
+  script:
+    # Запуск тестов с генерацией файла покрытия.
+    - flutter test --coverage
+  # Генерация артефакта - файла который содержит информацию о покрытии.
+  artifacts:
+    paths:
+      - coverage/lcov.info
+    expire_in: 1 day
+  tags:
+    - macos
+  when: manual
+
+flutter_build_android:
+  stage: build
+  interruptible: false
+  before_script:
+    - echo $KEYSTORE_BASE64 | base64 -d > ./upload-keystore.jks
+    - echo $KEY_PROPERTIES_BASE64 | base64 -d > ./android/key.properties
+    # Чистим папку с билдами
+    - flutter clean
+    - |
+      find ./packages -name "pubspec.yaml" -exec dirname {} \; | while read dir; do
+        echo "Running 'flutter pub get' in $dir"
+        (cd "$dir" && flutter pub get)
+      done
+    - flutter pub get
+    # Мержим файл зависимостей в зависимости от платформы
+    - |
+      if [ "$DEPLOYMENT_STORE" == "huawei" ]; then
+        dart run merge_yaml.dart pubspec-hms.yaml
+      elif [ "$DEPLOYMENT_STORE" == "rustore" ]; then
+        dart run merge_yaml.dart pubspec-rustore.yaml
+      elif [ "$DEPLOYMENT_STORE" == "google" ]; then
+        dart run merge_yaml.dart pubspec-gms.yaml
+      else
+        echo "Invalid DEPLOYMENT_STORE value. It must be either 'huawei' or 'rustore' or 'google'."
+        exit 1  
+      fi
+    # Установка зависимостей
+    - |
+      find ./packages -name "pubspec.yaml" -exec dirname {} \; | while read dir; do
+        echo "Running 'flutter pub get' in $dir"
+        (cd "$dir" && flutter pub get)
+      done
+    - flutter pub get
+    # Генерация кода
+    - flutter pub run build_runner build --delete-conflicting-outputs
+  script:
+    - |
+      if [ "$DEPLOYMENT_STORE" == "huawei" ]; then
+        flutter build apk --dart-define=deployment.store=huawei --dart-define-from-file=environment/environment-production.json --flavor huaweiProduction
+      elif [ "$DEPLOYMENT_STORE" == "rustore" ]; then
+        flutter build apk --dart-define=deployment.store=ru --dart-define-from-file=environment/environment-production.json --flavor rustoreProduction
+      elif [ "$DEPLOYMENT_STORE" == "google" ]; then
+        flutter build appbundle --dart-define=deployment.store=google --dart-define-from-file=environment/environment-production.json --flavor googleProduction
+      else
+        echo "Invalid DEPLOYMENT_STORE value. It must be either 'huawei' or 'rustore'."
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - build/app/outputs/flutter-apk/app-huaweiproduction-release.apk
+      - build/app/outputs/flutter-apk/app-rustoreproduction-release.apk
+      - build/app/outputs/bundle/googleProductionRelease/app-google-production-release.aab
+    expire_in: 7 day
+  tags:
+    - macos
+  variables:
+    # Переменная для указания платформы
+    DEPLOYMENT_STORE: "huawei" # Установите "rustore" или "huawei" или "google"
+  when: manual
+
+flutter_build_ios_ipa:
+  stage: build
+  interruptible: false
+  before_script:
+    - flutter clean
+    - |
+      find ./packages -name "pubspec.yaml" -exec dirname {} \; | while read dir; do
+        echo "Running 'flutter pub get' in $dir"
+        (cd "$dir" && flutter pub get)
+      done
+    - flutter pub get
+    - dart run merge_yaml.dart pubspec-gms.yaml
+    # Установка зависимостей
+    - |
+      find ./packages -name "pubspec.yaml" -exec dirname {} \; | while read dir; do
+        echo "Running 'flutter pub get' in $dir"
+        (cd "$dir" && flutter pub get)
+      done
+    - flutter pub get
+    - flutter pub run build_runner build --delete-conflicting-outputs
+    # Заходим в каталог ios
+    - cd ios
+    # Удаляем Podfile.lock
+    - rm -rf Pods/ Podfile.lock
+    # Устанавливаем зависимости
+    - pod install --repo-update
+  script:
+    - flutter build ipa --dart-define=deployment.store=apple  --dart-define-from-file=environment/environment-production.json --flavor production
+  artifacts:
+    paths:
+      - build/ios/ipa/*.ipa
+    expire_in: 7 day
+  tags:
+    - macos
+  when: manual

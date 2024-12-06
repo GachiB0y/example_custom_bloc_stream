@@ -1,4 +1,5 @@
 // import 'package:bloc_stream/feature/counter/bloc/counter_stream_bloc/counter_stream_bloc.dart';
+import 'package:bloc_stream/common/model/dependencies.dart';
 import 'package:bloc_stream/feature/counter/data/repo/counter_repo.dart';
 import 'package:bloc_stream/feature/counter/stream_bloc_command/bloc/counter_stream_bloc.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +19,14 @@ class _CounterStreamBlocScreenState extends State<CounterStreamBlocScreen> {
   @override
   void initState() {
     super.initState();
+
+    // final dicontainer = Dependencies.of(context);
     counterBLoC = CounterStreamBLoC(
       repository: const CounterRepo(),
-      commandFactory: DefaultCounterCommandFactory(CommandHistory()),
+      commandFactory: FactoryCommand(
+        container: Dependencies.of(context),
+        commandHistory: CommandHistory(),
+      ),
     );
   }
 

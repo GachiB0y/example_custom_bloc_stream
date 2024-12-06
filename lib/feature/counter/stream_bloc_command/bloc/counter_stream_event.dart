@@ -24,3 +24,8 @@ class DecrementCounterEvent extends CounterEvent {
 class UndoCounterEvent extends CounterEvent {
   const UndoCounterEvent();
 }
+
+// redo
+class redo extends CounterEvent {
+  const redo();
+}

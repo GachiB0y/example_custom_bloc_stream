@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc_stream/common/model/dependencies.dart';
 import 'package:bloc_stream/feature/color/bloc/color_bloc.dart';
+import 'package:bloc_stream/feature/counter/stream_bloc_command/bloc/counter_stream_bloc.dart';
 import 'package:bloc_stream/feature/initialization/data/platform/platform_initialization.dart';
 import 'package:flutter/material.dart';
 
@@ -52,6 +53,10 @@ final Map<String, _InitializationStep> _initializationSteps =
   'Log app open': (_) {},
   'Get remote config': (_) {},
   'Restore settings': (_) {},
+  'Initialize command Counter': (_) {
+    final commandHistory = CommandHistory();
+    final IncrementCommand incrementCommand = IncrementCommand();
+  },
   // 'Initialize shared preferences': (dependencies) async =>
   //     dependencies.sharedPreferences = await SharedPreferences.getInstance(),
   // 'Prepare authentication controller': (dependencies) =>

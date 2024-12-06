@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:bloc_stream/common/model/dependencies.dart';
 import 'package:bloc_stream/feature/counter/data/repo/counter_repo.dart';
 import 'package:flutter/foundation.dart';
 import 'package:stream_bloc/stream_bloc.dart';
@@ -29,33 +30,34 @@ class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
 
   @override
   Stream<CounterStreamState> mapEventToStates(CounterEvent event) async* {
-    yield* commandFactory.executeCommand(
-        event: event, currentState: state, repository: _repository);
+    yield* commandFactory
+        .createCommant(event: event, state: state, repository: _repository)
+        .execute();
   }
 }
 
 abstract class CounterCommand {
   const CounterCommand();
 
-  Stream<CounterStreamState> execute({
-    required CounterEvent event,
-    required ICounterRepository repository,
-  });
+  Stream<CounterStreamState> execute();
 
   Stream<CounterStreamState> undo();
 }
 
 class IncrementCommand extends CounterCommand {
-  const IncrementCommand(this.currentState) : previousState = currentState;
+  const IncrementCommand({
+    required this.currentState,
+    required this.event,
+    required this.repository,
+  }) : previousState = currentState;
 
   final CounterStreamState previousState;
   final CounterStreamState currentState;
+  final CounterEvent event;
+  final ICounterRepository repository;
 
   @override
-  Stream<CounterStreamState> execute({
-    required CounterEvent event,
-    required ICounterRepository repository,
-  }) async* {
+  Stream<CounterStreamState> execute() async* {
     yield CounterStreamState.processing(data: currentState.data);
     int? newData;
     try {
@@ -77,16 +79,20 @@ class IncrementCommand extends CounterCommand {
 }
 
 class DecrementCommand extends CounterCommand {
-  const DecrementCommand(this.currentState) : previousState = currentState;
+  const DecrementCommand({
+    required this.currentState,
+    required this.event,
+    required this.repository,
+  }) : previousState = currentState;
 
   final CounterStreamState previousState;
   final CounterStreamState currentState;
 
+  final CounterEvent event;
+  final ICounterRepository repository;
+
   @override
-  Stream<CounterStreamState> execute({
-    required CounterEvent event,
-    required ICounterRepository repository,
-  }) async* {
+  Stream<CounterStreamState> execute() async* {
     yield CounterStreamState.processing(data: currentState.data);
     int? newData;
     try {
@@ -114,10 +120,7 @@ class InitStateCommand extends CounterCommand {
   final CounterStreamState currentState;
 
   @override
-  Stream<CounterStreamState> execute({
-    required CounterEvent event,
-    required ICounterRepository repository,
-  }) async* {
+  Stream<CounterStreamState> execute() async* {
     // Просто возвращаем текущее состояние
     yield currentState;
   }
@@ -129,42 +132,49 @@ class InitStateCommand extends CounterCommand {
 }
 
 abstract class CounterCommandFactory {
-  Stream<CounterStreamState> executeCommand({
+  CounterCommand createCommant({
     required CounterEvent event,
-    required CounterStreamState currentState,
+    required CounterStreamState state,
     required ICounterRepository repository,
   });
 }
 
-class DefaultCounterCommandFactory implements CounterCommandFactory {
-  const DefaultCounterCommandFactory(this._commandHistory);
-  final CommandHistory _commandHistory;
+class FactoryCommand implements CounterCommandFactory {
+  FactoryCommand({
+    required this.commandHistory,
+    required this.container,
+  });
+
+  final CommandHistory commandHistory;
+  // final List<CounterCommand> comands;
+  final Dependencies container;
+
   @override
-  Stream<CounterStreamState> executeCommand({
+  CounterCommand createCommant({
     required CounterEvent event,
-    required CounterStreamState currentState,
+    required CounterStreamState state,
     required ICounterRepository repository,
   }) {
     switch (event) {
       case IncrementCounterEvent incrementCounterEvent:
-        _commandHistory.add(IncrementCommand(currentState));
-        return IncrementCommand(currentState)
-            .execute(repository: repository, event: incrementCounterEvent);
+        return container.incrementCommand;
       case DecrementCounterEvent decrementCounterEvent:
-        _commandHistory.add(IncrementCommand(currentState));
-        return DecrementCommand(currentState)
-            .execute(repository: repository, event: decrementCounterEvent);
+        return DecrementCommand(
+          currentState: state,
+          event: decrementCounterEvent,
+          repository: repository,
+        );
       case InitStateCounterEvent initStateCounterEvent:
-        _commandHistory.add(IncrementCommand(currentState));
-        return InitStateCommand(currentState)
-            .execute(repository: repository, event: initStateCounterEvent);
+        return InitStateCommand(state);
       case UndoCounterEvent():
-        return _commandHistory.undo();
+        return commandHistory;
+      case redo():
+        return commandHistory;
     }
   }
 }
 
-class CommandHistory {
+class CommandHistory implements CounterCommand {
   final _commandList = ListQueue<CounterCommand>();
 
   bool get isEmpty => _commandList.isEmpty;
@@ -178,9 +188,15 @@ class CommandHistory {
 
   void add(CounterCommand command) => _commandList.add(command);
 
+  @override
   Stream<CounterStreamState> undo() async* {
     if (_commandList.isEmpty) return;
 
     yield* _commandList.removeLast().undo();
+  }
+
+  @override
+  Stream<CounterStreamState> execute() {
+    return _commandList.last.execute();
   }
 }

@@ -16,7 +16,7 @@ class _CounterBlocScreenState extends State<CounterBlocScreen> {
   @override
   void initState() {
     super.initState();
-    counterBLoC = CounterBLoC(repository: CounterRepo());
+    counterBLoC = CounterBLoC(repository: const CounterRepo());
   }
 
   @override
