@@ -151,10 +151,13 @@ class FactoryCommand implements CounterCommandFactory {
   }) {
     switch (event) {
       case IncrementCounterEvent():
+        container.commandHistory.add(container.incrementCommand);
         return container.incrementCommand;
       case DecrementCounterEvent():
+        container.commandHistory.add(container.decrementCommand);
         return container.decrementCommand;
       case InitStateCounterEvent():
+        container.commandHistory.add(container.initStateCommand);
         return container.initStateCommand;
       case UndoCounterEvent():
         return container.commandHistory;
