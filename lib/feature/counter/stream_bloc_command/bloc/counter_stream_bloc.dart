@@ -31,33 +31,38 @@ class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
   @override
   Stream<CounterStreamState> mapEventToStates(CounterEvent event) async* {
     yield* commandFactory
-        .createCommant(event: event, state: state, repository: _repository)
-        .execute();
+        .createCommant(
+          event: event,
+        )
+        .execute(
+          currentState: state,
+          event: event,
+          repository: _repository,
+        );
   }
 }
 
 abstract class CounterCommand {
   const CounterCommand();
 
-  Stream<CounterStreamState> execute();
+  Stream<CounterStreamState> execute({
+    required CounterStreamState currentState,
+    required CounterEvent event,
+    required ICounterRepository repository,
+  });
 
-  Stream<CounterStreamState> undo();
+  Stream<CounterStreamState> undo(CounterStreamState previousState);
 }
 
 class IncrementCommand extends CounterCommand {
-  const IncrementCommand({
-    required this.currentState,
-    required this.event,
-    required this.repository,
-  }) : previousState = currentState;
-
-  final CounterStreamState previousState;
-  final CounterStreamState currentState;
-  final CounterEvent event;
-  final ICounterRepository repository;
+  const IncrementCommand();
 
   @override
-  Stream<CounterStreamState> execute() async* {
+  Stream<CounterStreamState> execute({
+    required CounterStreamState currentState,
+    required CounterEvent event,
+    required ICounterRepository repository,
+  }) async* {
     yield CounterStreamState.processing(data: currentState.data);
     int? newData;
     try {
@@ -71,7 +76,7 @@ class IncrementCommand extends CounterCommand {
   }
 
   @override
-  Stream<CounterStreamState> undo() async* {
+  Stream<CounterStreamState> undo(CounterStreamState previousState) async* {
     yield CounterStreamState.processing(data: previousState.data);
     yield CounterStreamState.successful(data: previousState.data);
     yield CounterStreamState.idle(data: previousState.data);
@@ -79,20 +84,14 @@ class IncrementCommand extends CounterCommand {
 }
 
 class DecrementCommand extends CounterCommand {
-  const DecrementCommand({
-    required this.currentState,
-    required this.event,
-    required this.repository,
-  }) : previousState = currentState;
-
-  final CounterStreamState previousState;
-  final CounterStreamState currentState;
-
-  final CounterEvent event;
-  final ICounterRepository repository;
+  const DecrementCommand();
 
   @override
-  Stream<CounterStreamState> execute() async* {
+  Stream<CounterStreamState> execute({
+    required CounterStreamState currentState,
+    required CounterEvent event,
+    required ICounterRepository repository,
+  }) async* {
     yield CounterStreamState.processing(data: currentState.data);
     int? newData;
     try {
@@ -106,7 +105,7 @@ class DecrementCommand extends CounterCommand {
   }
 
   @override
-  Stream<CounterStreamState> undo() async* {
+  Stream<CounterStreamState> undo(CounterStreamState previousState) async* {
     yield CounterStreamState.processing(data: previousState.data);
     yield CounterStreamState.successful(data: previousState.data);
     yield CounterStreamState.idle(data: previousState.data);
@@ -114,19 +113,20 @@ class DecrementCommand extends CounterCommand {
 }
 
 class InitStateCommand extends CounterCommand {
-  const InitStateCommand(this.currentState) : previousState = currentState;
-
-  final CounterStreamState previousState;
-  final CounterStreamState currentState;
+  const InitStateCommand();
 
   @override
-  Stream<CounterStreamState> execute() async* {
+  Stream<CounterStreamState> execute({
+    required CounterStreamState currentState,
+    required CounterEvent event,
+    required ICounterRepository repository,
+  }) async* {
     // Просто возвращаем текущее состояние
     yield currentState;
   }
 
   @override
-  Stream<CounterStreamState> undo() async* {
+  Stream<CounterStreamState> undo(CounterStreamState previousState) async* {
     yield previousState;
   }
 }
@@ -134,42 +134,30 @@ class InitStateCommand extends CounterCommand {
 abstract class CounterCommandFactory {
   CounterCommand createCommant({
     required CounterEvent event,
-    required CounterStreamState state,
-    required ICounterRepository repository,
   });
 }
 
 class FactoryCommand implements CounterCommandFactory {
   FactoryCommand({
-    required this.commandHistory,
     required this.container,
   });
 
-  final CommandHistory commandHistory;
   // final List<CounterCommand> comands;
-  final Dependencies container;
+  final DIConaierCommand container;
 
   @override
   CounterCommand createCommant({
     required CounterEvent event,
-    required CounterStreamState state,
-    required ICounterRepository repository,
   }) {
     switch (event) {
-      case IncrementCounterEvent incrementCounterEvent:
+      case IncrementCounterEvent():
         return container.incrementCommand;
-      case DecrementCounterEvent decrementCounterEvent:
-        return DecrementCommand(
-          currentState: state,
-          event: decrementCounterEvent,
-          repository: repository,
-        );
-      case InitStateCounterEvent initStateCounterEvent:
-        return InitStateCommand(state);
+      case DecrementCounterEvent():
+        return container.decrementCommand;
+      case InitStateCounterEvent():
+        return container.initStateCommand;
       case UndoCounterEvent():
-        return commandHistory;
-      case redo():
-        return commandHistory;
+        return container.commandHistory;
     }
   }
 }
@@ -189,14 +177,22 @@ class CommandHistory implements CounterCommand {
   void add(CounterCommand command) => _commandList.add(command);
 
   @override
-  Stream<CounterStreamState> undo() async* {
+  Stream<CounterStreamState> undo(CounterStreamState previousState) async* {
     if (_commandList.isEmpty) return;
 
-    yield* _commandList.removeLast().undo();
+    yield* _commandList.removeLast().undo(previousState);
   }
 
   @override
-  Stream<CounterStreamState> execute() {
-    return _commandList.last.execute();
+  Stream<CounterStreamState> execute({
+    required CounterStreamState currentState,
+    required CounterEvent event,
+    required ICounterRepository repository,
+  }) {
+    return _commandList.last.execute(
+      currentState: currentState,
+      event: event,
+      repository: repository,
+    );
   }
 }

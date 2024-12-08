@@ -24,9 +24,29 @@ class Dependencies {
   late final ColorBoxBloc colorBoxBloc;
 
   /// Counter Command
-  late final CommandHistory commandHistory;
+  late final DIConaierCommand diConaierCommand;
   late final FactoryCommand factoryCommand;
-  late final IncrementCommand incrementCommand;
-  late final DecrementCommand decrementCommand;
-  late final InitStateCommand initStateCommand;
+}
+
+abstract class DIConaierCommand {
+  const DIConaierCommand({
+    required this.incrementCommand,
+    required this.decrementCommand,
+    required this.initStateCommand,
+    required this.commandHistory,
+  });
+
+  final CommandHistory commandHistory;
+  final IncrementCommand incrementCommand;
+  final DecrementCommand decrementCommand;
+  final InitStateCommand initStateCommand;
+}
+
+class DICommand extends DIConaierCommand {
+  const DICommand({
+    required super.incrementCommand,
+    required super.decrementCommand,
+    required super.initStateCommand,
+    required super.commandHistory,
+  });
 }

@@ -53,9 +53,26 @@ final Map<String, _InitializationStep> _initializationSteps =
   'Log app open': (_) {},
   'Get remote config': (_) {},
   'Restore settings': (_) {},
-  'Initialize command Counter': (_) {
+  'Initialize command Counter': (dependencies) {
     final commandHistory = CommandHistory();
-    final IncrementCommand incrementCommand = IncrementCommand();
+    const IncrementCommand incrementCommand = IncrementCommand();
+    const DecrementCommand decrementCommand = DecrementCommand();
+    const InitStateCommand initStateCommand = InitStateCommand();
+
+    final dICommand = DICommand(
+      incrementCommand: incrementCommand,
+      decrementCommand: decrementCommand,
+      initStateCommand: initStateCommand,
+      commandHistory: commandHistory,
+    );
+
+    dependencies.diConaierCommand = dICommand;
+
+    final FactoryCommand factoryCommand = FactoryCommand(
+      container: dICommand,
+    );
+
+    dependencies.factoryCommand = factoryCommand;
   },
   // 'Initialize shared preferences': (dependencies) async =>
   //     dependencies.sharedPreferences = await SharedPreferences.getInstance(),

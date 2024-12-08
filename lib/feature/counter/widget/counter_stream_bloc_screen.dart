@@ -24,8 +24,7 @@ class _CounterStreamBlocScreenState extends State<CounterStreamBlocScreen> {
     counterBLoC = CounterStreamBLoC(
       repository: const CounterRepo(),
       commandFactory: FactoryCommand(
-        container: Dependencies.of(context),
-        commandHistory: CommandHistory(),
+        container: Dependencies.of(context).diConaierCommand,
       ),
     );
   }
