@@ -50,12 +50,12 @@ abstract class CounterCommand {
     required CounterEvent event,
     required ICounterRepository repository,
   });
-
-  Stream<CounterStreamState> undo(CounterStreamState previousState);
 }
 
 class IncrementCommand extends CounterCommand {
-  const IncrementCommand();
+  const IncrementCommand({required CommandHistory commandHistory})
+      : _commandHistory = commandHistory;
+  final CommandHistory _commandHistory;
 
   @override
   Stream<CounterStreamState> execute({
@@ -63,6 +63,7 @@ class IncrementCommand extends CounterCommand {
     required CounterEvent event,
     required ICounterRepository repository,
   }) async* {
+    _commandHistory.add(this, currentState);
     yield CounterStreamState.processing(data: currentState.data);
     int? newData;
     try {
@@ -74,17 +75,12 @@ class IncrementCommand extends CounterCommand {
       yield CounterStreamState.idle(data: newData ?? currentState.data);
     }
   }
-
-  @override
-  Stream<CounterStreamState> undo(CounterStreamState previousState) async* {
-    yield CounterStreamState.processing(data: previousState.data);
-    yield CounterStreamState.successful(data: previousState.data);
-    yield CounterStreamState.idle(data: previousState.data);
-  }
 }
 
 class DecrementCommand extends CounterCommand {
-  const DecrementCommand();
+  const DecrementCommand({required CommandHistory commandHistory})
+      : _commandHistory = commandHistory;
+  final CommandHistory _commandHistory;
 
   @override
   Stream<CounterStreamState> execute({
@@ -92,6 +88,7 @@ class DecrementCommand extends CounterCommand {
     required CounterEvent event,
     required ICounterRepository repository,
   }) async* {
+    _commandHistory.add(this, currentState);
     yield CounterStreamState.processing(data: currentState.data);
     int? newData;
     try {
@@ -103,17 +100,12 @@ class DecrementCommand extends CounterCommand {
       yield CounterStreamState.idle(data: newData ?? currentState.data);
     }
   }
-
-  @override
-  Stream<CounterStreamState> undo(CounterStreamState previousState) async* {
-    yield CounterStreamState.processing(data: previousState.data);
-    yield CounterStreamState.successful(data: previousState.data);
-    yield CounterStreamState.idle(data: previousState.data);
-  }
 }
 
 class InitStateCommand extends CounterCommand {
-  const InitStateCommand();
+  const InitStateCommand({required CommandHistory commandHistory})
+      : _commandHistory = commandHistory;
+  final CommandHistory _commandHistory;
 
   @override
   Stream<CounterStreamState> execute({
@@ -121,6 +113,7 @@ class InitStateCommand extends CounterCommand {
     required CounterEvent event,
     required ICounterRepository repository,
   }) async* {
+    _commandHistory.add(this, currentState);
     // Просто возвращаем текущее состояние
     yield currentState;
   }
@@ -151,13 +144,10 @@ class FactoryCommand implements CounterCommandFactory {
   }) {
     switch (event) {
       case IncrementCounterEvent():
-        container.commandHistory.add(container.incrementCommand);
         return container.incrementCommand;
       case DecrementCounterEvent():
-        container.commandHistory.add(container.decrementCommand);
         return container.decrementCommand;
       case InitStateCounterEvent():
-        container.commandHistory.add(container.initStateCommand);
         return container.initStateCommand;
       case UndoCounterEvent():
         return container.commandHistory;
@@ -166,7 +156,10 @@ class FactoryCommand implements CounterCommandFactory {
 }
 
 class CommandHistory implements CounterCommand {
+  CommandHistory();
   final _commandList = ListQueue<CounterCommand>();
+
+  final _stateList = ListQueue<CounterStreamState>();
 
   bool get isEmpty => _commandList.isEmpty;
   List<String> get commandHistoryList {
@@ -177,13 +170,10 @@ class CommandHistory implements CounterCommand {
     return list;
   }
 
-  void add(CounterCommand command) => _commandList.add(command);
+  void add(CounterCommand command, CounterStreamState currentState) {
+    _commandList.add(command);
 
-  @override
-  Stream<CounterStreamState> undo(CounterStreamState previousState) async* {
-    if (_commandList.isEmpty) return;
-
-    yield* _commandList.removeLast().undo(previousState);
+    _stateList.add(currentState);
   }
 
   @override
@@ -191,11 +181,13 @@ class CommandHistory implements CounterCommand {
     required CounterStreamState currentState,
     required CounterEvent event,
     required ICounterRepository repository,
-  }) {
-    return _commandList.last.execute(
-      currentState: currentState,
-      event: event,
-      repository: repository,
-    );
+  }) async* {
+    if (_commandList.isEmpty || _stateList.isEmpty) return;
+    final previousState = _stateList.removeLast();
+    _commandList.removeLast();
+
+    yield CounterStreamState.processing(data: previousState.data);
+    yield CounterStreamState.successful(data: previousState.data);
+    yield CounterStreamState.idle(data: previousState.data);
   }
 }

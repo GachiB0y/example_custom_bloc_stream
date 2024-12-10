@@ -55,9 +55,12 @@ final Map<String, _InitializationStep> _initializationSteps =
   'Restore settings': (_) {},
   'Initialize command Counter': (dependencies) {
     final commandHistory = CommandHistory();
-    const IncrementCommand incrementCommand = IncrementCommand();
-    const DecrementCommand decrementCommand = DecrementCommand();
-    const InitStateCommand initStateCommand = InitStateCommand();
+    IncrementCommand incrementCommand =
+        IncrementCommand(commandHistory: commandHistory);
+    DecrementCommand decrementCommand =
+        DecrementCommand(commandHistory: commandHistory);
+    InitStateCommand initStateCommand =
+        InitStateCommand(commandHistory: commandHistory);
 
     final dICommand = DICommand(
       incrementCommand: incrementCommand,
