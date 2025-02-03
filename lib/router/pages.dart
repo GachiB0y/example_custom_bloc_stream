@@ -1,5 +1,6 @@
 // Pages and screens, just for the example
 import 'package:bloc_stream/app.dart';
+import 'package:bloc_stream/feature/calendar/widget/calendar_screen.dart';
 import 'package:bloc_stream/feature/catalog/widget/catalog_screen.dart';
 import 'package:bloc_stream/feature/category/widget/category_screen.dart';
 import 'package:bloc_stream/feature/color/widget/colors_screen.dart';
@@ -24,7 +25,10 @@ enum AppPages {
   bloc('bloc-example', title: 'Bloc Example'),
   catalog('catalog', title: 'Catalog'),
   category('category', title: 'Category'),
-  product('product', title: 'Product');
+  product('product', title: 'Product'),
+
+  calendar('calendar', title: 'Calendar'),
+  ;
 
   const AppPages(this.name, {this.title});
 
@@ -67,6 +71,8 @@ enum AppPages {
         return const CounterCustomStreamBlocScreen();
       case AppPages.counterNotifier:
         return const CounterNotifierScreen();
+      case AppPages.calendar:
+        return const CalendarScreen();
     }
   }
 }
