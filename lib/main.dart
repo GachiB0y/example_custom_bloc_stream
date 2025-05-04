@@ -1,3 +1,4 @@
+import 'package:bloc_stream/loader_itl.dart';
 import 'package:bloc_stream/sliver_grid_deleaget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Centered Last Element Grid')),
-        body: const MyGridView(),
+        body: const SplashScreen(),
       ),
     );
   }
@@ -28,31 +29,39 @@ class MyGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const int itemCount = 3; // Количество элементов
-    return GridView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: itemCount,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndCenteredLastRow(
-        itemCount: itemCount,
-        crossAxisCount: 3, // 3 элемента в строке
-        mainAxisSpacing: 16.0,
-        crossAxisSpacing: 16.0,
-        childAspectRatio: 1.0,
-      ),
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.blueAccent,
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Center(
-            child: Text(
-              'Item $index',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+    const int itemCount = 1; // Количество элементов
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: CustomScrollView(
+        slivers: [
+          SliverGrid.builder(
+            // padding: const EdgeInsets.all(16.0),
+            itemCount: itemCount,
+            gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCountAndCenteredLastRow(
+              itemCount: itemCount,
+              crossAxisCount: 3, // 3 элемента в строке
+              mainAxisSpacing: 16.0,
+              crossAxisSpacing: 16.0,
+              childAspectRatio: 1.0,
             ),
+            itemBuilder: (context, index) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Center(
+                  child: Text(
+                    'Item $index',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              );
+            },
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
