@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:bloc_stream/common/bloc/bloc_factory.dart';
+import 'package:bloc_stream/common/bloc/implementation/implementation_bloc_factory.dart';
 import 'package:bloc_stream/common/model/dependencies.dart';
 import 'package:bloc_stream/feature/color/bloc/color_bloc.dart';
+import 'package:bloc_stream/feature/counter/data/repo/counter_repo.dart';
 import 'package:bloc_stream/feature/counter/stream_bloc_command/bloc/counter_stream_bloc.dart';
 import 'package:bloc_stream/feature/initialization/data/platform/platform_initialization.dart';
 import 'package:flutter/material.dart';
@@ -109,6 +112,17 @@ final Map<String, _InitializationStep> _initializationSteps =
 
     final bloc = ColorBoxBloc();
     dependencies.colorBoxBloc = bloc;
+  },
+  'Init bloc factory': (dependencies) {
+    // final colorBoxBLoC = ColorBoxBloc(
+    //   repository: dependencies.colorsRepository,
+    // )..fetch();
+    // dependencies.colorBoxBloc = colorBoxBLoC;
+    final IBlocFactory blocFactory = BloCFactory(
+      repository: const CounterRepo(),
+      commandFactory: dependencies.factoryCommand,
+    );
+    dependencies.blocFactory = blocFactory;
   },
   'Initialize localization': (_) {},
   'Migrate app from previous version': (_) {},

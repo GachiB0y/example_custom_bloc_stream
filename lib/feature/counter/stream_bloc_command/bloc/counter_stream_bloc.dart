@@ -3,16 +3,17 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:bloc_stream/common/model/dependencies.dart';
+import 'package:bloc_stream/feature/counter/bloc/counter_stream_bloc/counter_stream_bloc.dart';
 import 'package:bloc_stream/feature/counter/data/repo/counter_repo.dart';
-import 'package:flutter/foundation.dart';
 import 'package:stream_bloc/stream_bloc.dart';
 
-part 'counter_stream_event.dart';
-part 'counter_stream_state.dart';
+// part 'counter_stream_event.dart';
+// part 'counter_stream_state.dart';
 
-class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
+class CounterStreamBLoCWithCommand
+    extends StreamBloc<CounterEvent, CounterStreamState>
     implements EventSink<CounterEvent> {
-  CounterStreamBLoC({
+  CounterStreamBLoCWithCommand({
     required ICounterRepository repository,
     required this.commandFactory,
     CounterStreamState? initialState,

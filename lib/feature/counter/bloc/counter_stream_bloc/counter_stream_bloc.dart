@@ -20,23 +20,37 @@ class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
                 data: 0,
                 message: 'Initial idle state',
               ),
-        );
+        ) {
+    stream.listen(_saveState);
+  }
 
   final ICounterRepository _repository;
+  final List<CounterStreamState> _stateHistory = [];
+
+  void _saveState(CounterStreamState state) {
+    _stateHistory.add(state);
+    // Ограничиваем историю последними N состояниями
+    if (_stateHistory.length > 10) {
+      _stateHistory.removeAt(0);
+    }
+  }
+
   @override
   Stream<CounterStreamState> mapEventToStates(CounterEvent event) async* {
     switch (event) {
       case IncrementCounterEvent incrementCounterEvent:
-        yield* increment(incrementCounterEvent);
+        yield* _increment(incrementCounterEvent);
       case DecrementCounterEvent decrementCounterEvent:
         yield* decrement(decrementCounterEvent);
       case InitStateCounterEvent initStateCounterEvent:
         yield state;
+      case UndoCounterEvent undoCounterEvent:
+        yield* _undo(undoCounterEvent);
     }
   }
 
   /// Fetch event handler  /// increment event handler
-  Stream<CounterStreamState> increment(IncrementCounterEvent event) async* {
+  Stream<CounterStreamState> _increment(IncrementCounterEvent event) async* {
     // yield CounterStreamState.processing(data: state.data);
 
     try {
@@ -68,6 +82,21 @@ class CounterStreamBLoC extends StreamBloc<CounterEvent, CounterStreamState>
     } finally {
       yield CounterStreamState.idle(data: state.data);
     }
+  }
+
+  Stream<CounterStreamState> _undo(UndoCounterEvent event) async* {
+    if (_stateHistory.length >= 2) {
+      // Получаем предпоследнее состояние (последнее перед текущим)
+      final previousState = _stateHistory[_stateHistory.length - 2];
+      yield CounterStreamState.successful(data: previousState.data);
+      await Future.delayed(const Duration(milliseconds: 100));
+    } else {
+      yield CounterStreamState.error(
+        data: state.data,
+        message: 'Нет предыдущего состояния',
+      );
+    }
+    yield CounterStreamState.idle(data: state.data);
   }
 }
 
@@ -107,6 +136,8 @@ class CounterCustomStreamBloc implements Sink<CounterEvent> {
         yield* decrement(event);
       case InitStateCounterEvent():
         yield _currentState;
+      case UndoCounterEvent():
+        yield* _undo(event);
     }
   }
 
@@ -153,4 +184,6 @@ class CounterCustomStreamBloc implements Sink<CounterEvent> {
       yield CounterStreamState.idle(data: state.data);
     }
   }
+
+  _undo(UndoCounterEvent event) {}
 }

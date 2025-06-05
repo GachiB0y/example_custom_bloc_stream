@@ -1,9 +1,10 @@
 // import 'package:bloc_stream/feature/counter/bloc/counter_stream_bloc/counter_stream_bloc.dart';
+import 'package:bloc_stream/common/bloc/bloc_factory.dart';
 import 'package:bloc_stream/common/model/dependencies.dart';
-import 'package:bloc_stream/feature/counter/data/repo/counter_repo.dart';
-import 'package:bloc_stream/feature/counter/stream_bloc_command/bloc/counter_stream_bloc.dart';
+import 'package:bloc_stream/feature/counter/bloc/counter_stream_bloc/counter_stream_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stream_bloc/stream_bloc.dart';
 
 class CounterStreamBlocScreen extends StatefulWidget {
   const CounterStreamBlocScreen({super.key});
@@ -14,19 +15,16 @@ class CounterStreamBlocScreen extends StatefulWidget {
 }
 
 class _CounterStreamBlocScreenState extends State<CounterStreamBlocScreen> {
-  late final CounterStreamBLoC counterBLoC;
+  late final StreamBloc<CounterEvent, CounterStreamState> counterBLoC;
 
   @override
   void initState() {
     super.initState();
 
     // final dicontainer = Dependencies.of(context);
-    counterBLoC = CounterStreamBLoC(
-      repository: const CounterRepo(),
-      commandFactory: FactoryCommand(
-        container: Dependencies.of(context).diConaierCommand,
-      ),
-    );
+    counterBLoC = Dependencies.of(context).blocFactory.createCounterStreamBloc(
+          ConterStreeamBlocType.counterStreamBlocWithCommand,
+        );
   }
 
   @override
@@ -35,7 +33,8 @@ class _CounterStreamBlocScreenState extends State<CounterStreamBlocScreen> {
       appBar: AppBar(
         title: const Text('stream_bloc'),
       ),
-      body: BlocBuilder<CounterStreamBLoC, CounterStreamState>(
+      body: BlocBuilder<StreamBloc<CounterEvent, CounterStreamState>,
+          CounterStreamState>(
         bloc: counterBLoC,
         builder: (context, state) {
           if (state is CounterStreamState$Idle ||

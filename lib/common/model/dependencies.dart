@@ -1,3 +1,4 @@
+import 'package:bloc_stream/common/bloc/bloc_factory.dart';
 import 'package:bloc_stream/feature/color/bloc/color_bloc.dart';
 import 'package:bloc_stream/feature/counter/stream_bloc_command/bloc/counter_stream_bloc.dart';
 import 'package:bloc_stream/feature/initialization/widget/inherited_dependencies.dart';
@@ -26,6 +27,8 @@ class Dependencies {
   /// Counter Command
   late final DIConaierCommand diConaierCommand;
   late final FactoryCommand factoryCommand;
+
+  late final IBlocFactory blocFactory;
 }
 
 abstract class DIConaierCommand {

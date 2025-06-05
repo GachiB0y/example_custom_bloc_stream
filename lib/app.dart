@@ -1,4 +1,3 @@
-import 'package:bloc_stream/feature/calendar/widget/calendar_screen.dart';
 import 'package:bloc_stream/feature/deeplinks/bloc/deeplink_bloc.dart';
 import 'package:bloc_stream/router/pages.dart';
 import 'package:bloc_stream/router/router.dart';
@@ -119,7 +118,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const CalendarScreen());
+      body: const BodyWidget());
 }
 
 class BodyWidget extends StatelessWidget {
@@ -152,9 +151,10 @@ class BodyWidget extends StatelessWidget {
                       AppPages.counterNotifier.page(),
                     ]),
           ),
-          const Text('Counter Stream package Bloc '),
+          const Text('Counter Stream package StreamBloc'),
           ListTile(
-            title: const Text('Go Counter Stream package Bloc'),
+            title:
+                const Text('Go Counter Stream  with used package StreamBloc'),
             onTap: () => AppNavigator.change(
                 context,
                 (pages) => [
